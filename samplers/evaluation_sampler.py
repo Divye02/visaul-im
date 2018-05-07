@@ -57,7 +57,7 @@ def do_evaluation_rollout(N,
         done = False
         t = 0
 
-        o = np.concatenate(list(next_o.values()))
+        o = np.concatenate(list(o.values()))
         while t < T and done != True:
             _, agent_info = policy.get_action(o)
             a = agent_info['evaluation']
