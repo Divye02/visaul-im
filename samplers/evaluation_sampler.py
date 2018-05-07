@@ -5,7 +5,7 @@ logging.disable(logging.CRITICAL)
 import numpy as np
 from visual_im.utils.get_environment import get_environment
 from visual_im.utils import tensor_utils
-
+from dm_control.rl.environment import StepType
 
 # Single core rollout to sample trajectories
 # =======================================================
@@ -57,17 +57,19 @@ def do_evaluation_rollout(N,
         done = False
         t = 0
 
+        o = np.concatenate(list(next_o.values()))
         while t < T and done != True:
             _, agent_info = policy.get_action(o)
             a = agent_info['evaluation']
-            next_o, r, done, env_info = env.step(a)
+            step_type, r, discount, next_o = env.step(a)
+            done = step_type == StepType.LAST
             # observations.append(o.ravel())
             observations.append(o)
             actions.append(a)
             rewards.append(r)
             agent_infos.append(agent_info)
-            env_infos.append(env_info)
-            o = next_o
+            # env_infos.append(env_info)
+            o = np.concatenate(list(next_o.values()))
             t += 1
 
         path = dict(
@@ -75,7 +77,7 @@ def do_evaluation_rollout(N,
             actions=np.array(actions),
             rewards=np.array(rewards),
             agent_infos=tensor_utils.stack_tensor_dict_list(agent_infos),
-            env_infos=tensor_utils.stack_tensor_dict_list(env_infos),
+            # env_infos=tensor_utils.stack_tensor_dict_list(env_infos),
             terminated=done
         )
 
