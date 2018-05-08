@@ -7,6 +7,7 @@ import multiprocessing as mp
 import time as timer
 import visual_im.samplers.base_sampler as base_sampler
 import visual_im.samplers.evaluation_sampler as eval_sampler
+from visual_im.utils.get_environment import get_environment
 
 def sample_paths(N, policy, T=1e6, env=None, domain_name=None, task_name=None, pegasus_seed=None, mode='sample'):
     if mode == 'sample':
@@ -39,10 +40,10 @@ def sample_paths_parallel(N,
     args_list = []
     for i in range(num_cpu):
         if pegasus_seed is None:
-            args_list_cpu = [paths_per_cpu, policy, T, None, domain_name, task_name, pegasus_seed]
+            args_list_cpu = [paths_per_cpu, policy, T, get_environment(domain_name, task_name), domain_name, task_name, pegasus_seed]
         else:
             args_list_cpu = [paths_per_cpu, policy, T,
-                            None, domain_name, task_name, pegasus_seed+i*paths_per_cpu]
+                             get_environment(domain_name, task_name), domain_name, task_name, pegasus_seed+i*paths_per_cpu]
         args_list.append(args_list_cpu)
 
     # Do multiprocessing

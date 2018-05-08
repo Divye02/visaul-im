@@ -1,5 +1,7 @@
 import numpy as np
 from dm_control import suite
+from dm_control.rl.environment import StepType
+from visual_im.visual.viewer import DmControlViewer
 
 class EnvSpec(object):
     def __init__(self, obs_dim, act_dim, horizon, num_agents):
@@ -55,7 +57,26 @@ class DeepMindEnv(object):
         self.env.physics.render()
 
     def visualize_policy(self, policy, horizon=1000, num_episodes=1, mode='exploration'):
-        self.env.env.visualize_policy(policy, horizon, num_episodes, mode)
+        pixels = self.env.physics.render()
+        self.renderer = DmControlViewer(pixels.shape[1], pixels.shape[0])
+        for ep in range(num_episodes):
+            o = self.reset()
+            d = False
+            t = 0
+
+            o = np.concatenate(list(o.observation.values()))
+
+            while t < horizon and d is False:
+                pixels = self.env.physics.render()
+                self.renderer.update(pixels)
+                a = policy.get_action(o)[0] if mode == 'exploration' else policy.get_action(o)[1]['evaluation']
+                step_type, r, discount, next_o = self.step(a)
+                d = step_type == StepType.LAST
+                t = t+1
+
+
+        self.mujoco_render_frames = False
+
 
     def seed(self, seed):
         self.env.task.random.seed(seed)

@@ -1,4 +1,6 @@
-import os
+import matplotlib
+matplotlib.use('agg')
+
 from visual_im.baselines.mlp_baseline import MLPBaseline
 from visual_im.algos.npg import NaturalPolicyGradients
 from visual_im.algos.adaptive_vpg import AdaptiveVPG
@@ -68,7 +70,7 @@ def main():
     train_agent(job_name=ensure_dir(job_name),
                 agent=agent,
                 seed=SEED,
-                niter=int(500 / args.nt),
+                niter=2,
                 gamma=0.995,
                 gae_lambda=0.97,
                 num_cpu=1,
